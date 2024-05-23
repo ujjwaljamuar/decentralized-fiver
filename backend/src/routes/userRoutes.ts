@@ -7,23 +7,39 @@ import {
     PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-import { JWT_SECRET } from "..";
+import { JWT_SECRET } from "../config/secrets";
+import { authMiddleware } from "../middlewares/middleware";
+import { ACCESS_KEY_ID, SECRET_ACCESS_KEY } from "../config/secrets";
 
 const router = express.Router();
-
 const prismaClient = new PrismaClient();
+const s3Client = new S3Client({
+    credentials: {
+        accessKeyId: `${ACCESS_KEY_ID}`,
+        secretAccessKey: `${SECRET_ACCESS_KEY}`,
+    },
+    region: "ap-south-1"
+});
 
-router.get("/presignedurl",authMiddleware, (req, res) => {
-    // @ts-ignore
+router.get("/presignedurl", authMiddleware, async (req, res) => {
+    //@ts-ignore
     const userId = req.userId;
-
     const command = new PutObjectCommand({
-        Bucket: "bucket-name",
-        Key: "/fiver",
+        Bucket: "dcl-fiver",
+        Key: `/fiver/${userId}/${Math.random()}/image.jpg`,
+        ContentType: "img/jpg",
+    });
 
-    })
-})
+    const presignedurl = await getSignedUrl(s3Client, command, {
+        expiresIn: 3600,
+    });
+
+    console.log(presignedurl);
+
+    res.json({
+        presignedurl,
+    });
+});
 
 // SIGN IN WITH WALLET
 // SIGNING A MESSAGE

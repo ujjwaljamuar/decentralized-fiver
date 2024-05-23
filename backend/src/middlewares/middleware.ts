@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "..";
+import { JWT_SECRET } from "../config/secrets";
 
 export function authMiddleware(
     req: Request,
@@ -13,7 +13,7 @@ export function authMiddleware(
         const decoded = jwt.verify(authHeader, JWT_SECRET);
 
         //@ts-ignore
-        if (decoded.userid) {
+        if (decoded.userId) {
             //@ts-ignore
             req.userId = decoded.userId;
             return next();
