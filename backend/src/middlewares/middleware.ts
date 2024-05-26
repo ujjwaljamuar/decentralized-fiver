@@ -10,7 +10,7 @@ export function authMiddleware(
     const authHeader = req.headers["authorization"] ?? "";
 
     try {
-        const decoded = jwt.verify(authHeader, JWT_SECRET);
+        const decoded = jwt.verify(authHeader, `${JWT_SECRET}`);
 
         //@ts-ignore
         if (decoded.userId) {
