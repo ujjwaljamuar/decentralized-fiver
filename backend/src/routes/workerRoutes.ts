@@ -32,7 +32,7 @@ router.post("/submission", workerAuthMiddleware, async (req, res) => {
         const amount = task.amount / TOTAL_SUBMISSIONS;
 
         const submission = prismaClient.$transaction(async (tx) => {
-            const submission = await giprismaClient.submission.create({
+            const submission = await prismaClient.submission.create({
                 data: {
                     option_id: Number(parsedData.data.selection),
                     worker_id: userId,
