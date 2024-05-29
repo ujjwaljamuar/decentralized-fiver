@@ -20,3 +20,8 @@ export type getTaskResult = Record<
         };
     }
 >;
+
+export const createSubmissionInput = z.object({
+    taskId: z.string(),
+    selection: z.string(),
+});

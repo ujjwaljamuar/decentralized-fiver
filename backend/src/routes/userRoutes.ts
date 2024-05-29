@@ -2,9 +2,8 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { S3Client } from "@aws-sdk/client-s3";
-import { JWT_SECRET } from "../config/secrets";
+import { JWT_SECRET, ACCESS_KEY_ID, SECRET_ACCESS_KEY } from "../config/config";
 import { authMiddleware } from "../middlewares/middleware";
-import { ACCESS_KEY_ID, SECRET_ACCESS_KEY } from "../config/secrets";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { createTaskInput, getTaskResult } from "../types";
 
