@@ -1,0 +1,5 @@
+-- migrate the db
+npx prisma migrate dev --name <name it>
+
+-- regenerate the client
+npx prisma generate

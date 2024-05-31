@@ -2,7 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { S3Client } from "@aws-sdk/client-s3";
-import { JWT_SECRET, ACCESS_KEY_ID, SECRET_ACCESS_KEY } from "../config/config";
+import {
+    JWT_SECRET,
+    ACCESS_KEY_ID,
+    SECRET_ACCESS_KEY,
+    TOTAL_DECIMALS,
+} from "../config/config";
 import { authMiddleware } from "../middlewares/middleware";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { createTaskInput, getTaskResult } from "../types";
@@ -89,7 +94,7 @@ router.post("/task", authMiddleware, async (req, res) => {
                 title:
                     parsedData.data.title ??
                     "Select the most clickable thumbnail",
-                amount: 1,
+                amount: 1 * TOTAL_DECIMALS,
                 signature: parsedData.data.signature,
             },
         });
@@ -126,8 +131,6 @@ router.get("/presignedurl", authMiddleware, async (req, res) => {
 
         Expires: 3600,
     });
-
-    console.log({ url, fields });
 
     res.json({
         presignedUrl: url,

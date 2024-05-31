@@ -15,5 +15,5 @@ app.use("/v1/user", userRoutes);
 app.use("/v1/worker", workerRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port - ${PORT}`);
+    console.log(`Server is running...`);
 });
