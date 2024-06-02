@@ -3,3 +3,7 @@
 /backend/.env
 /backend/secretsfile.txt
 /backend/prisma/migrations
+
+/user-ui/node_modules
+
+/worker-ui/node_modules

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import express from "express";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { S3Client } from "@aws-sdk/client-s3";
