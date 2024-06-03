@@ -23,12 +23,16 @@ export function UploadImage({
                     headers: {
                         // Authorization: localStorage.getItem("token"),
                         Authorization:
-                            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzIzNjQ0Mn0.dpIFrJZJGdzUnA2r9VSIl4ATskeU1mLxk_Xmzk4PPR0",
+                            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzQwNzUwMX0.izIHlBSFld87aqLmwDfQZL3FTtn1SzifjEYTilf9aU4",
                     },
                 }
             );
+
+            // console.log(response.data.fields["key"]);
             const presignedUrl = response.data.preSignedUrl;
+
             const formData = new FormData();
+
             formData.set("bucket", response.data.fields["bucket"]);
             formData.set(
                 "X-Amz-Algorithm",
@@ -54,6 +58,7 @@ export function UploadImage({
                 response.data.fields["X-Amz-Algorithm"]
             );
             formData.append("file", file);
+            
             const awsResponse = await axios.post(presignedUrl, formData);
 
             onImageAdded(`${CLOUDFRONT_URL}/${awsResponse.data.fields["key"]}`);

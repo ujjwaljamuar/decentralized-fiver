@@ -1,6 +1,6 @@
-export const ACCESS_KEY_ID = `${process.env.ACCESS_KEY_ID}`;
+// export const BUCKET_NAME: string = `${process.env.BUCKET_NAME}`;
 
-export const SECRET_ACCESS_KEY = `${process.env.SECRET_ACCESS_KEY}`;
+// export const BUCKET_KEY: string = `${process.env.BUCKET_KEY}`;
 
 export const JWT_SECRET = `${process.env.JWT_SECRET}`;
 

@@ -2,20 +2,15 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { S3Client } from "@aws-sdk/client-s3";
-import {
-    JWT_SECRET,
-    ACCESS_KEY_ID,
-    SECRET_ACCESS_KEY,
-    TOTAL_DECIMALS,
-} from "../config/config";
+import { JWT_SECRET, TOTAL_DECIMALS } from "../config/config";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { createTaskInput, getTaskResult } from "../types";
 
 const prismaClient = new PrismaClient();
 const s3Client = new S3Client({
     credentials: {
-        accessKeyId: ACCESS_KEY_ID,
-        secretAccessKey: SECRET_ACCESS_KEY,
+        accessKeyId: process.env.ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.SECRET_ACCESS_KEY ?? "",
     },
     region: "ap-south-1",
 });
@@ -118,20 +113,16 @@ export const getPresignedUrl = async (req: Request, res: Response) => {
     const userId = req.userId;
 
     const { url, fields } = await createPresignedPost(s3Client, {
-        Bucket: "dcl-fiver",
-        Key: `fiver/${userId}/${Math.random()}/image.jpg`,
+        Bucket: `${process.env.BUCKET_NAME}`,
+        Key: `${process.env.BUCKET_NAME}/${userId}/${Math.random()}/image.jpg`,
         Conditions: [
-            ["content-length-range", 0, 5 * 1024 * 1024], // 5mb
+            ["content-length-range", 0, 5 * 1024 * 1024], // 5 MB max
         ],
-        Fields: {
-            "Content-Type": "image/jpg",
-        },
-
         Expires: 3600,
     });
 
     res.json({
-        presignedUrl: url,
+        preSignedUrl: url,
         fields,
     });
 };
