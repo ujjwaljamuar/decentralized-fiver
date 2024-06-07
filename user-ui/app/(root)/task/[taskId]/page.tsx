@@ -9,10 +9,13 @@ async function getTaskDetails(taskId: string) {
         `${BACKEND_URL}/v1/user/task?taskId=${taskId}`,
         {
             headers: {
-                Authorization: localStorage.getItem("token"),
+                // Authorization: localStorage.getItem("token"),
+                Authorization:
+                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzQwNzUwMX0.izIHlBSFld87aqLmwDfQZL3FTtn1SzifjEYTilf9aU4",
             },
         }
     );
+
     return response.data;
 }
 
@@ -38,7 +41,7 @@ export default function Page({
 
     useEffect(() => {
         getTaskDetails(taskId).then((data) => {
-            setResult(data.result);
+            setResult(data.results);
             setTaskDetails(data.taskDetails);
         });
     }, [taskId]);

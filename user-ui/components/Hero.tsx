@@ -1,5 +1,5 @@
 export const Hero = () => {
-    return <div className="text-white pt-10">
+    return <div className="text-black pt-10">
         <div className="text-2xl flex justify-center">
             Welcome to TLabll
         </div>

@@ -59,9 +59,9 @@ export function UploadImage({
             );
             formData.append("file", file);
             
-            const awsResponse = await axios.post(presignedUrl, formData);
+            const awsResponse = await axios.post(presignedUrl, formData);            
 
-            onImageAdded(`${CLOUDFRONT_URL}/${awsResponse.data.fields["key"]}`);
+            onImageAdded(`${CLOUDFRONT_URL}/${response.data.fields["key"]}`);
         } catch (e) {
             console.log(e);
         }

@@ -10,7 +10,7 @@ import { BACKEND_URL } from "@/utils/configs";
 export const Upload = () => {
     const [images, setImages] = useState<string[]>([]);
     const [title, setTitle] = useState("");
-    const [txSignature, setTxSignature] = useState("");
+    const [txSignature, setTxSignature] = useState("0xjenf3245n");
     // const { publicKey, sendTransaction } = useWallet();
     // const { connection } = useConnection();
     const router = useRouter();
@@ -27,7 +27,8 @@ export const Upload = () => {
             },
             {
                 headers: {
-                    Authorization: localStorage.getItem("token"),
+                    // Authorization: localStorage.getItem("token"),
+                    Authorization: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzQwNzUwMX0.izIHlBSFld87aqLmwDfQZL3FTtn1SzifjEYTilf9aU4",
                 },
             }
         );
@@ -70,7 +71,7 @@ export const Upload = () => {
                     Create a task
                 </div>
 
-                <label className="pl-4 block mt-2 text-md font-medium text-white text-gray-900 ">
+                <label className="pl-4 block mt-2 text-md font-medium text-black text-gray-900 ">
                     Task details
                 </label>
 
@@ -85,13 +86,13 @@ export const Upload = () => {
                     required
                 />
 
-                <label className="pl-4 block mt-8 text-md font-medium text-white text-gray-900">
+                <label className="pl-4 block mt-8 text-md font-medium text-black text-gray-900">
                     Add Images
                 </label>
                 <div className="flex justify-center pt-4 max-w-screen-lg">
                     {images.map((image) => (
                         <UploadImage
-                            key={""}
+                            key={image}
                             image={image}
                             onImageAdded={(imageUrl) => {
                                 setImages((i) => [...i, imageUrl]);
