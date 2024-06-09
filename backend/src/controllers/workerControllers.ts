@@ -110,7 +110,7 @@ export const submitTask = async (req: Request, res: Response) => {
                 },
                 data: {
                     pending_amount: {
-                        increment: amount,
+                        increment: Number(amount),
                     },
                 },
             });
@@ -123,6 +123,10 @@ export const submitTask = async (req: Request, res: Response) => {
         res.json({
             nextTask,
             amountEarned: amount,
+        });
+    } else {
+        res.status(411).json({
+            message: "Incorrect inputs",
         });
     }
 };
