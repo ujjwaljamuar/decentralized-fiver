@@ -9,9 +9,9 @@ async function getTaskDetails(taskId: string) {
         `${BACKEND_URL}/v1/user/task?taskId=${taskId}`,
         {
             headers: {
-                // Authorization: localStorage.getItem("token"),
-                Authorization:
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzQwNzUwMX0.izIHlBSFld87aqLmwDfQZL3FTtn1SzifjEYTilf9aU4",
+                Authorization: localStorage.getItem("token"),
+                // Authorization:
+                //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzQwNzUwMX0.izIHlBSFld87aqLmwDfQZL3FTtn1SzifjEYTilf9aU4",
             },
         }
     );
@@ -44,6 +44,12 @@ export default function Page({
             setResult(data.results);
             setTaskDetails(data.taskDetails);
         });
+        setInterval(() => {
+            getTaskDetails(taskId).then((data) => {
+                setResult(data.results);
+                setTaskDetails(data.taskDetails);
+            });
+        }, 5000);
     }, [taskId]);
 
     return (

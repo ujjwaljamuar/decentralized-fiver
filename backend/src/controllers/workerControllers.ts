@@ -8,6 +8,10 @@ import { createSubmissionInput } from "../types";
 
 const prismaClient = new PrismaClient();
 
+prismaClient.$transaction(async (prisma) => {}, {
+    maxWait: 5000,
+    timeout: 10000,
+});
 export const payout = async (req: Request, res: Response) => {
     //@ts-ignore
     const userId: string = req.userId;
@@ -94,7 +98,7 @@ export const submitTask = async (req: Request, res: Response) => {
 
         const amount = task.amount / TOTAL_SUBMISSIONS;
 
-        const submission = prismaClient.$transaction(async (tx) => {
+        const submission = await prismaClient.$transaction(async (tx) => {
             const submission = await tx.submission.create({
                 data: {
                     option_id: Number(parsedData.data.selection),

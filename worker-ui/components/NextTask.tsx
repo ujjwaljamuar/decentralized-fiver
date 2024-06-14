@@ -20,39 +20,53 @@ interface Task {
 const Nexttask = () => {
     const [currentTask, setCurrentTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         setLoading(true);
         axios
             .get(`${BACKEND_URL}/v1/worker/nexttask`, {
                 headers: {
-                    // Authorization: localStorage.getItem("token"),
-                    Authorization:
-                        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzkyMzg4M30.YLIjjbPfvSBxe_mb2P4nw_gmGCRNBtjZs2cBoeFigPA",
+                    Authorization: localStorage.getItem("token"),
+                    // Authorization:
+                    //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzkyMzg4M30.YLIjjbPfvSBxe_mb2P4nw_gmGCRNBtjZs2cBoeFigPA",
                 },
             })
             .then((res) => {
                 setCurrentTask(res.data.task);
                 setLoading(false);
+            })
+            .catch((e) => {
+                setLoading(false);
+                setCurrentTask(null);
             });
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="h-screen flex justify-center flex-col">
+                <div className="w-full flex justify-center text-2xl">
+                    Loading...
+                </div>
+            </div>
+        );
     }
 
     if (!currentTask) {
         return (
-            <div>
-                There are no pending task at the moment, Please check again
-                after some time.
+            <div className="h-screen flex justify-center flex-col">
+                <div className="w-full flex justify-center text-2xl">
+                    There are no pending task at the moment, Please check again
+                    after some time.
+                </div>
             </div>
         );
     }
     return (
         <div>
             <div className="text-2xl pt-20 flex justify-center">
-                {currentTask.title}
+                {currentTask.title} {currentTask.id}
+                {submitting && "Submitting..."}
             </div>
 
             <div className="flex justify-center pt-8">
@@ -60,24 +74,37 @@ const Nexttask = () => {
                     <Option
                         key={option.id}
                         onSelect={async () => {
-                            const response = await axios.post(
-                                `${BACKEND_URL}/v1/worker/submission`,
-                                {
-                                    taskId: currentTask.id,
-                                    selection: option.id,
-                                },
-                                {
-                                    headers: {
-                                        // Authorization: localStorage.getItem("token"),
-                                        Authorization:
-                                            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzkyMzg4M30.YLIjjbPfvSBxe_mb2P4nw_gmGCRNBtjZs2cBoeFigPA",
+                            setSubmitting(true);
+                            try {
+                                const response = await axios.post(
+                                    `${BACKEND_URL}/v1/worker/submission`,
+                                    {
+                                        taskId: currentTask.id.toString(),
+                                        selection: option.id.toString(),
                                     },
-                                }
-                            );
+                                    {
+                                        headers: {
+                                            // Authorization: localStorage.getItem("token"),
+                                            Authorization:
+                                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNzkyMzg4M30.YLIjjbPfvSBxe_mb2P4nw_gmGCRNBtjZs2cBoeFigPA",
+                                        },
+                                    }
+                                );
 
-                            const nextTask = response.data.next
+                                const nextTask = response.data.nextTask;
+                                if (nextTask) {
+                                    setCurrentTask(nextTask);
+                                } else {
+                                    setCurrentTask(null);
+                                }
+
+                                
+                            } catch (e) {
+                                console.log(e);
+                                
+                            }
+                            setSubmitting(false);
                         }}
-                        id={option.id}
                         imageUrl={option.image_url}
                     />
                 ))}
@@ -88,17 +115,16 @@ const Nexttask = () => {
 
 function Option({
     imageUrl,
-    id,
+    onSelect,
 }: {
     imageUrl: string;
-    id: string;
     onSelect: () => void;
 }) {
     return (
         <div>
-            <Image
+            <img
                 className={"p-2 w-96 rounded-md"}
-                onClick={onselect}
+                onClick={onSelect}
                 src={imageUrl}
                 alt="imageUrl"
             />

@@ -18,12 +18,12 @@ export function authMiddleware(
             req.userId = decoded.userId;
             return next();
         } else {
-            res.status(403).json({
+            return res.status(403).json({
                 message: `Not Logged In`,
             });
         }
     } catch (e) {
-        res.status(403).json({
+        return res.status(403).json({
             message: `Not Logged In, ${e}`,
         });
     }
@@ -45,12 +45,12 @@ export function workerAuthMiddleware(
             req.userId = decoded.userId;
             return next();
         } else {
-            res.status(403).json({
+            return res.status(403).json({
                 message: `Not Logged In`,
             });
         }
     } catch (e) {
-        res.status(403).json({
+        return res.status(403).json({
             message: `Not Logged In, ${e}`,
         });
     }

@@ -5,6 +5,8 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { JWT_SECRET, TOTAL_DECIMALS } from "../config/config";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { createTaskInput, getTaskResult } from "../types";
+import nacl from "tweetnacl";
+import { PublicKey } from "@solana/web3.js";
 
 const prismaClient = new PrismaClient();
 const s3Client = new S3Client({
@@ -64,7 +66,7 @@ export const getTask = async (req: Request, res: Response) => {
 
     res.json({
         results,
-        taskDetails
+        taskDetails,
     });
 };
 
@@ -129,13 +131,28 @@ export const getPresignedUrl = async (req: Request, res: Response) => {
 };
 
 export const userSignIn = async (req: Request, res: Response) => {
+    const { signature, publicKey } = req.body;
+    const message = new TextEncoder().encode("Sign in to TLabll");
+
+    const result = nacl.sign.detached.verify(
+        message,
+        new Uint8Array(signature.data),
+        new PublicKey(publicKey).toBytes()
+    );
+
+    if (!result) {
+        return res.status(411).json({
+            message: "Incorrect signature",
+        });
+    }
+
     // verification logic
-    const hardCodedWalletAddress = "qwertyuiopasdfghjklzxcvbnm";
+    // const hardCodedWalletAddress = "qwertyuiopasdfghjklzxcvbnm";
 
     // upsert - create or update
     const existingUser = await prismaClient.user.findFirst({
         where: {
-            address: hardCodedWalletAddress,
+            address: publicKey,
         },
     });
 
@@ -156,7 +173,7 @@ export const userSignIn = async (req: Request, res: Response) => {
     else {
         const user = await prismaClient.user.create({
             data: {
-                address: hardCodedWalletAddress,
+                address: publicKey,
             },
         });
 
