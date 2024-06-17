@@ -12,7 +12,6 @@ export const getNextTask = async (userId: number) => {
                 },
             },
         },
-
         select: {
             id: true,
             amount: true,

@@ -8,20 +8,9 @@ export const createTaskInput = z.object({
             })
         )
         .min(2),
-
     title: z.string().optional(),
     signature: z.string(),
 });
-
-export type getTaskResult = Record<
-    string,
-    {
-        count: number;
-        option: {
-            imageUrl: string;
-        };
-    }
->;
 
 export const createSubmissionInput = z.object({
     taskId: z.string(),

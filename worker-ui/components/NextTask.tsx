@@ -97,11 +97,8 @@ const Nexttask = () => {
                                 } else {
                                     setCurrentTask(null);
                                 }
-
-                                
                             } catch (e) {
                                 console.log(e);
-                                
                             }
                             setSubmitting(false);
                         }}

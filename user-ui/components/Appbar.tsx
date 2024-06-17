@@ -17,7 +17,7 @@ export const Appbar = () => {
         }
         const message = new TextEncoder().encode("Sign in to TLabll");
         const signature = await signMessage?.(message);
-        const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+        const response = await axios.post(`${BACKEND_URL}/v1/user/signin`, {
             signature,
             publicKey: publicKey?.toString(),
         });

@@ -1,6 +1,6 @@
 import express from "express";
 
-import { workerAuthMiddleware } from "../middlewares/middleware";
+import { workerMiddleware } from "../middlewares/middleware";
 import {
     getBalance,
     nextTask,
@@ -12,16 +12,16 @@ import {
 const router = express.Router();
 
 // Payout
-router.route("/payout").post(workerAuthMiddleware, payout);
+router.route("/payout").post(workerMiddleware, payout);
 
 // Get Balance
-router.route("/balance").get(workerAuthMiddleware, getBalance);
+router.route("/balance").get(workerMiddleware, getBalance);
 
 // Submit Task
-router.route("/submission").post(workerAuthMiddleware, submitTask);
+router.route("/submission").post(workerMiddleware, submitTask);
 
 // Next Task
-router.route("/nexttask").get(workerAuthMiddleware, nextTask);
+router.route("/nextTask").get(workerMiddleware, nextTask);
 
 // Worker Sign in
 router.route("/signin").post(workerSignIn);

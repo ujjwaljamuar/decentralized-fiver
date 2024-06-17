@@ -1,43 +1,86 @@
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import nacl from "tweetnacl";
 import { PrismaClient } from "@prisma/client";
-
-import { JWT_SECRET_WORKER, TOTAL_SUBMISSIONS } from "../config/config";
+import jwt from "jsonwebtoken";
+import { TOTAL_DECIMALS, WORKER_JWT_SECRET } from "../config/config";
 import { getNextTask } from "../utils/utilities";
 import { createSubmissionInput } from "../types";
+import {
+    Connection,
+    Keypair,
+    PublicKey,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { privateKey } from "../config/config";
+import { decode } from "bs58";
+
+const connection = new Connection(process.env.RPC_URL ?? "");
+
+const TOTAL_SUBMISSIONS = 100;
 
 const prismaClient = new PrismaClient();
 
-prismaClient.$transaction(async (prisma) => {}, {
-    maxWait: 5000,
-    timeout: 10000,
-});
-export const payout = async (req: Request, res: Response) => {
-    //@ts-ignore
-    const userId: string = req.userId;
+prismaClient.$transaction(
+    async (prisma) => {
+        // Code running in a transaction...
+    },
+    {
+        maxWait: 5000, // default: 2000
+        timeout: 10000, // default: 5000
+    }
+);
 
+export const payout = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const userId: string = req.userId;
     const worker = await prismaClient.worker.findFirst({
-        where: {
-            id: Number(userId),
-        },
+        where: { id: Number(userId) },
     });
 
     if (!worker) {
         return res.status(403).json({
-            message: "User Not Found !!",
+            message: "User not found",
         });
     }
 
-    const address = worker.address;
+    const transaction = new Transaction().add(
+        SystemProgram.transfer({
+            fromPubkey: new PublicKey(
+                "2KeovpYvrgpziaDsq8nbNMP4mc48VNBVXb5arbqrg9Cq"
+            ),
+            toPubkey: new PublicKey(worker.address),
+            lamports: (1000_000_000 * worker.pending_amount) / TOTAL_DECIMALS,
+        })
+    );
 
-    const txnId = "0x235364712";
+    console.log(worker.address);
 
+    const keypair = Keypair.fromSecretKey(decode(privateKey));
+
+    // TODO: There's a double spending problem here
+    // The user can request the withdrawal multiple times
+    // Can u figure out a way to fix it?
+    let signature = "";
+    try {
+        signature = await sendAndConfirmTransaction(connection, transaction, [
+            keypair,
+        ]);
+    } catch (e) {
+        return res.json({
+            message: "Transaction failed",
+        });
+    }
+
+    console.log(signature);
+
+    // We should add a lock here
     await prismaClient.$transaction(async (tx) => {
         await tx.worker.update({
             where: {
                 id: Number(userId),
             },
-
             data: {
                 pending_amount: {
                     decrement: worker.pending_amount,
@@ -52,14 +95,14 @@ export const payout = async (req: Request, res: Response) => {
             data: {
                 user_id: Number(userId),
                 amount: worker.pending_amount,
-                signature: txnId,
                 status: "Processing",
+                signature: signature,
             },
         });
     });
 
     res.json({
-        message: "Processing payout..",
+        message: "Processing payout",
         amount: worker.pending_amount,
     });
 };
@@ -75,36 +118,34 @@ export const getBalance = async (req: Request, res: Response) => {
     });
 
     res.json({
-        worker,
+        pendingAmount: worker?.pending_amount,
+        lockedAmount: worker?.pending_amount,
     });
 };
 
 export const submitTask = async (req: Request, res: Response) => {
     // @ts-ignore
     const userId = req.userId;
-
     const body = req.body;
+    const parsedBody = createSubmissionInput.safeParse(body);
 
-    const parsedData = createSubmissionInput.safeParse(body);
-
-    if (parsedData.success) {
+    if (parsedBody.success) {
         const task = await getNextTask(Number(userId));
-
-        if (!task || task?.id !== Number(parsedData.data.taskId)) {
+        if (!task || task?.id !== Number(parsedBody.data.taskId)) {
             return res.status(411).json({
-                Message: "Incorrect task id",
+                message: "Incorrect task id",
             });
         }
 
-        const amount = task.amount / TOTAL_SUBMISSIONS;
+        const amount = (Number(task.amount) / TOTAL_SUBMISSIONS).toString();
 
         const submission = await prismaClient.$transaction(async (tx) => {
             const submission = await tx.submission.create({
                 data: {
-                    option_id: Number(parsedData.data.selection),
+                    option_id: Number(parsedBody.data.selection),
                     worker_id: userId,
-                    task_id: Number(parsedData.data.taskId),
-                    amount,
+                    task_id: Number(parsedBody.data.taskId),
+                    amount: Number(amount),
                 },
             });
 
@@ -123,10 +164,9 @@ export const submitTask = async (req: Request, res: Response) => {
         });
 
         const nextTask = await getNextTask(Number(userId));
-
         res.json({
             nextTask,
-            amountEarned: amount,
+            amount,
         });
     } else {
         res.status(411).json({
@@ -137,29 +177,43 @@ export const submitTask = async (req: Request, res: Response) => {
 
 export const nextTask = async (req: Request, res: Response) => {
     // @ts-ignore
-    const userId = req.userId;
+    const userId: string = req.userId;
 
-    const task = await getNextTask(userId);
+    const task = await getNextTask(Number(userId));
 
     if (!task) {
         res.status(411).json({
-            message: "No more task left.",
+            message: "No more tasks.",
+        });
+    } else {
+        res.json({
+            task,
         });
     }
-
-    res.json({
-        task,
-    });
 };
 
 export const workerSignIn = async (req: Request, res: Response) => {
-    // verification logic
-    const hardCodedWalletAddress = "qwertyuiopasdfghjklzxcvbnmxxx";
+    // const hardCodedWalletAddress = "qwertyuiopasdfghjklzxcvbnmxxx";
 
-    // upsert - create or update
+    const { publicKey, signature } = req.body;
+    const message = new TextEncoder().encode("Sign in to TLabll as a worker");
+
+    const result = nacl.sign.detached.verify(
+        message,
+        new Uint8Array(signature.data),
+        new PublicKey(publicKey).toBytes()
+    );
+
+    if (!result) {
+        return res.status(411).json({
+            message: "Incorrect signature",
+        });
+    }
+
     const existingUser = await prismaClient.worker.findFirst({
         where: {
-            address: hardCodedWalletAddress,
+            address: publicKey,
+            // address: hardCodedWalletAddress,
         },
     });
 
@@ -168,19 +222,18 @@ export const workerSignIn = async (req: Request, res: Response) => {
             {
                 userId: existingUser.id,
             },
-            JWT_SECRET_WORKER
+            WORKER_JWT_SECRET
         );
 
         res.json({
             token,
+            amount: existingUser.pending_amount / TOTAL_DECIMALS,
         });
-    }
-
-    // else create a new user
-    else {
+    } else {
         const user = await prismaClient.worker.create({
             data: {
-                address: hardCodedWalletAddress,
+                address: publicKey,
+                // address: hardCodedWalletAddress,
                 pending_amount: 0,
                 locked_amount: 0,
             },
@@ -190,11 +243,12 @@ export const workerSignIn = async (req: Request, res: Response) => {
             {
                 userId: user.id,
             },
-            JWT_SECRET_WORKER
+            WORKER_JWT_SECRET
         );
 
         res.json({
             token,
+            amount: 0,
         });
     }
 };

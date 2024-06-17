@@ -1,11 +1,10 @@
-// export const BUCKET_NAME: string = `${process.env.BUCKET_NAME}`;
-
-// export const BUCKET_KEY: string = `${process.env.BUCKET_KEY}`;
-
 export const JWT_SECRET = `${process.env.JWT_SECRET}`;
 
-export const JWT_SECRET_WORKER = `${process.env.JWT_SECRET}`;
+export const WORKER_JWT_SECRET = `${process.env.JWT_SECRET}`;
 
 export const TOTAL_DECIMALS = 1000_000;
 
-export const TOTAL_SUBMISSIONS = 100;
+export const privateKey =
+    "5stejMkAjXLd5w7h4ar9PoiyQGgw5v5bWXawjqdALsfLXHtgcm3U8WQL53roDQtYGhyj1hbiyAexrib1CVzw1J3G";
+
+// 1/1000_000_000_000_000_000
