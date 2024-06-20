@@ -57,9 +57,9 @@ export const payout = async (req: Request, res: Response) => {
 
     console.log("worker transaction - \n", transaction);
 
-    const keypair = Keypair.fromSecretKey(decode(privateKey));
-
-    
+    const keypair = Keypair.fromSecretKey(
+        decode(process.env.USER_ACCOUNT_PRIVATE_KEY ?? "")
+    );
 
     // TODO: There's a double spending problem here
     // The user can request the withdrawal multiple times
