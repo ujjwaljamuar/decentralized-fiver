@@ -5,6 +5,6 @@ export const WORKER_JWT_SECRET = `${process.env.JWT_SECRET}`;
 export const TOTAL_DECIMALS = 1000_000;
 
 export const privateKey =
-    "5stejMkAjXLd5w7h4ar9PoiyQGgw5v5bWXawjqdALsfLXHtgcm3U8WQL53roDQtYGhyj1hbiyAexrib1CVzw1J3G";
+    "3BoVVc9g13XhLUH6u2Bbt4WyeuvCxPjYb6LksjcDzKebzSyKdqU236FW7JJNAYiDTH4hP3Um1qx7scAqNmogLPN2";
 
 // 1/1000_000_000_000_000_000

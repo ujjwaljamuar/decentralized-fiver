@@ -10,10 +10,10 @@ import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 
 const connection = new Connection(process.env.RPC_URL ?? "");
 
-// console.log("connection - \n", connection);
+console.log("connection - \n", connection);
 
 // const PARENT_WALLET_ADDRESS = "2KeovpYvrgpziaDsq8nbNMP4mc48VNBVXb5arbqrg9Cq";
-const PARENT_WALLET_ADDRESS = "5Wr7heHxrgJW3VbhctPtgKJFTyfwftkAUVVoG7aUkGn";
+const PARENT_WALLET_ADDRESS = "AWV6G67qjQvD9VK5273YBwm1XkHDdY6nsc811FhkdFpN";
 
 const DEFAULT_TITLE = "Select the most clickable thumbnail";
 
@@ -118,6 +118,8 @@ export const addTask = async (req: Request, res: Response) => {
         });
     }
 
+    console.log("signature - ", parseData.data.signature);
+
     const transaction = await connection.getTransaction(
         parseData.data.signature,
         {
@@ -125,7 +127,8 @@ export const addTask = async (req: Request, res: Response) => {
         }
     );
 
-    console.log(transaction);
+    console.log("new transaction \n", transaction);
+    
 
     if (
         (transaction?.meta?.postBalances[1] ?? 0) -

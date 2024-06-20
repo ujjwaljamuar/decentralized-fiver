@@ -48,16 +48,18 @@ export const payout = async (req: Request, res: Response) => {
     const transaction = new Transaction().add(
         SystemProgram.transfer({
             fromPubkey: new PublicKey(
-                "2KeovpYvrgpziaDsq8nbNMP4mc48VNBVXb5arbqrg9Cq"
+                "AWV6G67qjQvD9VK5273YBwm1XkHDdY6nsc811FhkdFpN"
             ),
             toPubkey: new PublicKey(worker.address),
             lamports: (1000_000_000 * worker.pending_amount) / TOTAL_DECIMALS,
         })
     );
 
-    console.log(worker.address);
+    console.log("worker transaction - \n", transaction);
 
     const keypair = Keypair.fromSecretKey(decode(privateKey));
+
+    
 
     // TODO: There's a double spending problem here
     // The user can request the withdrawal multiple times
